@@ -12,6 +12,7 @@ class GUI:
     def __init__(self):
         print(f'log: app started')
         self.PLOpened = False
+        self.CDSOpened = False
         self.title = "Blood Donor Database Management System"
         self.mainFont = 'Arial 20'
         self.subFont = 'Arial 10'
@@ -81,19 +82,14 @@ class GUI:
                                         ).grid(column=0,row=6,columnspan=2,sticky='ns',padx=10,pady=5)
         self.button_CheckDonorStatus = ttk.Button(self.main,
                                         text = "Check Donor Status",
-                                        command = self.CheckDonorStatus,
+                                        command = lambda: self.CheckDonorStatus(fetch = sqlDB.executeQuery(sql='EXEC uspCheckDonorStatus').fetchall(), title='Donor Status'),
                                         width = 30
                                         ).grid(column=0,row=7,columnspan=2,sticky='ns',padx=10,pady=5)
         self.button_RequestDonor = ttk.Button(self.main,
                                         text = "Request Donor",
-                                        command = None,
+                                        command = self.RequestDonors,
                                         width = 30,
                                         ).grid(column=0,row=8,columnspan=2,sticky='s',padx=10,pady=10,ipady=10)
-        self.button_debugDonors = ttk.Button(self.main,
-                                        text = "DEBUG: modify donors",
-                                        command = None,
-                                        width = 30
-                                        ).grid(column=0,row=10,columnspan=2,sticky='ns',padx=10,pady=5)
         print(f'log: main buttons set')
         #main display
         #self.display = ttk.Label(self.main,
@@ -116,35 +112,10 @@ class GUI:
                             row=2,
                             sticky='ns',
                             pady=2)
-
-        #self.display.grid(column=2,
-        #                  row=2,
-        #                  columnspan=4,
-        #                  rowspan=9,
-        #                  sticky='nw',
-        #                  pady=15,
-        #                  padx=15)
-
         self.main.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.main.mainloop()
 
     #---------------button functions-------------------------------------------------
-
-    #def ClinicInfo(self):
-    #    self.infoWindow = ThemedTk(theme='yaru')
-    #    self.infoWindow.title('Clinic Info')
-    #    self.infoWindow.resizable(0,0)
-    #    self.infoName = ttk.Label(self.infoWindow,
-    #                              text=self.fetchName('name'),
-    #                              font=self.mainFont).pack(padx=10,side='top')
-    #    self.infoLoc = ttk.Label(self.infoWindow,
-    #                              text=self.fetchName('loc'),
-    #                              font=self.subFont).pack(padx=10, pady=2)
-    #    self.infoCont = ttk.Label(self.infoWindow,
-    #                              text=self.fetchName('cont'),
-    #                              font=self.subFont).pack(padx=10, pady=2, side='bottom')
-    #    self.infoWindow.mainloop()
-
     def PatientList(self):
         print(f'log: PatientList drawn')
         if self.PLOpened:
@@ -171,21 +142,25 @@ class GUI:
         ttk.Label(self.patientList,
                   text="Patient No.",
                   font='Consolas 12',
-                  width=20,
+                  width=13,
+                  anchor='center',
                   relief='groove').grid(column=0, row=0, ipadx=5,ipady=5,sticky='news')
         ttk.Label(self.patientList,
                   text="Name",
                   font='Consolas 12',
+                  anchor='center',
                   relief='groove').grid(column=1, row=0, columnspan=3,ipadx=5,ipady=5,sticky='news')
         ttk.Label(self.patientList,
                   text="Age",
                   font='Consolas 12',
                   width = 4,
+                  anchor='center',
                   relief='groove').grid(column=4, row=0,ipadx=5,ipady=5,sticky='nws')
         ttk.Label(self.patientList,
                   text="Blood Type",
                   font='Consolas 12',
                   width = 10,
+                  anchor='center',
                   relief='groove').grid(column=5, row=0,ipadx=5,ipady=5,sticky='nws')
 
     def draw_PatientList(self, start, arg):
@@ -202,22 +177,26 @@ class GUI:
             ttk.Label(self.patientList,
                       text=f"Patient #{i.patient_id}",
                       font='Consolas 10',
+                      anchor='center',
                       width = 20,
                       relief='groove').grid(column=0, row=rowPos,ipadx=5,ipady=5,sticky='nws')
             ttk.Label(self.patientList,
                       text=f"{i.patient_name}",
                       font='Consolas 10',
                       width = 25,
+                      anchor='center',
                       relief='groove').grid(column=1, row=rowPos, columnspan=3,ipadx=5,ipady=5,sticky='nws')
-            tk.Label(self.patientList,
+            ttk.Label(self.patientList,
                       text=f"{i.patient_age}",
                       font='Consolas 10',
                       width = 5,
+                      anchor='center',
                       relief='groove').grid(column=4, row=rowPos,ipadx=5,ipady=5,sticky='ns')
-            tk.Label(self.patientList,
+            ttk.Label(self.patientList,
                       text=f"{i.blood_type}",
                       font='Consolas 10',
                       width = 13,
+                      anchor='center',
                       relief='groove').grid(column=5, row=rowPos,ipadx=5,ipady=5,sticky='ns')
             rowPos += 1
         button_pos = rowPos + 1
@@ -408,12 +387,16 @@ class GUI:
             self.PL_onclose()
             tk.messagebox.showinfo(title='Success',message='Successfully deleted patient')
 
-    def CheckDonorStatus(self):
+    def CheckDonorStatus(self, fetch, title):
+        print("log: CheckDonorStatus called")
+        if self.CDSOpened:
+            self.CDS_onclose()
+        self.CDSOpened = True
         self.donorStatus = ThemedTk(theme='yaru')
-        self.donorStatus.title('Donor Status')
+        self.donorStatus.title(title)
         self.donorStatus.resizable(0,0)
-        fetch = sqlDB.executeQuery(sql='EXEC uspCheckDonorStatus').fetchall()
         self.draw_CheckDonorStatus(start=1,arg=fetch)
+        self.donorStatus.protocol('WM_DELETE_WINDOW', self.CDS_onclose)
 
     def drawheader_CheckDonorStatus(self):
         print(f'log: drawheader_CheckDonorStatus called')
@@ -508,8 +491,7 @@ class GUI:
                       width = 54,
                       anchor='center',
                       relief='groove').grid(column=6, row=rowPos, columnspan=2, ipadx=5,ipady=5,sticky='nws')
-            print(i.donor_status)
-            print(str(i.donor_status))
+            print(f"log: {i.donor_id} = {i.donor_status}")
             if(str(i.donor_status) == "Available"):
                 ttk.Label(self.donorStatus,
                           text="Available",
@@ -564,22 +546,148 @@ class GUI:
             widgets.destroy()
         self.draw_CheckDonorStatus(start=pos,arg=fetch)
 
+    def CDS_onclose(self):
+        print(f'log: CDS_onclose() called')
+        self.CDSOpened = False
+        self.donorStatus.destroy()
+
+    def RequestDonors(self):
+        print(f'log: RequestDonors called')
+        if not self.PLOpened:
+            self.PatientList()
+        self.requestDonors = ThemedTk(theme='yaru')
+        self.requestDonors.title('Request Donors')
+        self.requestDonors.resizable(0,0)
+        ttk.Label(self.requestDonors,
+                  text = 'Patient #',
+                  font = self.subFont).grid(column=0,row=0,padx=10,pady=3,sticky='news')
+        patientID = StringVar(self.requestDonors)
+        self.modify_entry_ID = ttk.Entry(self.requestDonors,
+                             textvariable=patientID,
+                             width=10)
+        self.button_confirmPatient = ttk.Button(self.requestDonors,
+                                        text = "Confirm",
+                                        command = lambda: self.confirm_RequestDonors(id = patientID.get()),
+                                        width = 10)
+        self.modify_entry_ID.grid(column=1,row=0,pady=3,sticky='nw')
+        self.button_confirmPatient.grid(column=2,row=0,sticky='ns',padx=10,pady=3)
+        self.requestDonors.mainloop()
+
+    def confirm_RequestDonors(self, id):
+        self.button_confirmPatient.state(['disabled'])
+        self.modify_entry_ID.config(state='readonly')
+        self.PL_onclose()
+        print(f"log: request id = {id}")
+        fetch = sqlDB.executeQuery(sql='SELECT * FROM patients WHERE patient_id = ?',params=id).fetchall()
+        ttk.Label(self.requestDonors,
+                  text="Patient No.",
+                  font='Consolas 12',
+                  anchor = 'center',
+                  relief='groove').grid(column=0, row=1, ipadx=5,ipady=5,sticky='news')
+        ttk.Label(self.requestDonors,
+                  text="Name",
+                  font='Consolas 12',
+                  anchor = 'center',
+                  relief='groove').grid(column=1, row=1,ipadx=5,ipady=5,sticky='news')
+        ttk.Label(self.requestDonors,
+                  text="Age",
+                  font='Consolas 12',
+                  anchor = 'center',
+                  width = 4,
+                  relief='groove').grid(column=2, row=1,ipadx=5,ipady=5,sticky='news')
+        ttk.Label(self.requestDonors,
+                  text="Blood Type",
+                  font='Consolas 12',
+                  anchor = 'center',
+                  width = 10,
+                  relief='groove').grid(column=3, row=1,ipadx=5,ipady=5,sticky='news')
+        ttk.Button(self.requestDonors,
+                   text="Find Donors",
+                   command = lambda: self.findDonors(id=id),
+                   width = 10).grid(column=3,row=3,sticky='ns',padx=10,pady=3)
+        for i in fetch:
+            rowPos = 2
+            ttk.Label(self.requestDonors,
+                      text=f"Patient #{i.patient_id}",
+                      font='Consolas 10',
+                      anchor = 'center',
+                      relief='groove').grid(column=0, row=rowPos,ipadx=5,ipady=5,sticky='news')
+            ttk.Label(self.requestDonors,
+                      text=f"{i.patient_name}",
+                      font='Consolas 10',
+                      anchor = 'center',
+                      relief='groove').grid(column=1, row=rowPos,ipadx=5,ipady=5,sticky='news')
+            ttk.Label(self.requestDonors,
+                      text=f"{i.patient_age}",
+                      font='Consolas 10',
+                      anchor = 'center',
+                      width = 5,
+                      relief='groove').grid(column=2, row=rowPos,ipadx=5,ipady=5,sticky='news')
+            ttk.Label(self.requestDonors,
+                      text=f"{i.blood_type}",
+                      font='Consolas 10',
+                      anchor = 'center',
+                      width = 13,
+                      relief='groove').grid(column=3, row=rowPos,ipadx=5,ipady=5,sticky='news')
+    def findDonors(self, id):
+        self.CheckDonorStatus(fetch = sqlDB.executeQuery(sql='EXEC uspFindCompatibleDonors @patient_id = ?',params=id).fetchall(),title='Compatible Donors')
+        for widgets in self.requestDonors.winfo_children():
+            widgets.destroy()
+        ttk.Label(self.requestDonors,
+                  text = 'Donor #',
+                  font = self.subFont).grid(column=0,row=0,padx=10,pady=3,sticky='news')
+        donorID = StringVar(self.requestDonors)
+        self.entry_donorID = ttk.Entry(self.requestDonors,
+                             textvariable=donorID,
+                             width=10)
+        self.button_confirmPatient = ttk.Button(self.requestDonors,
+                                        text = "Send Request",
+                                        command = lambda: self.sendRequest(id=donorID.get()),
+                                        width = 15)
+        self.entry_donorID.grid(column=1,row=0,pady=3,sticky='nw')
+        self.button_confirmPatient.grid(column=2,row=0,sticky='ns',padx=10,pady=3)
+
     #-----------------------------functions----------------------------------------
+    def sendRequest(self, id):
+        if self.isAvailable(id=id):
+            answer = tk.messagebox.askyesno(title='Request Confirm',
+                                            message='Are you sure you want to send a request for this donor?')
+            if answer:
+                print(f'log: request sent Donor {id}')
+                sqlDB.executeQuery(sql="UPDATE donors SET donor_status = 'Request Pending' WHERE donor_id = ?",
+                                    params = id)
+                self.requestDonors.destroy()
+                self.CDS_onclose()
+                tk.messagebox.showinfo(title='Success',message='Successfully sent request!')
+        else:
+            self.requestDonors.destroy()
+            self.CDS_onclose()
+            tk.messagebox.showwarning(title='Error',message='Donor is not available!')
+
+    def isAvailable(self, id):
+        fetch = sqlDB.executeQuery(sql="SELECT donor_status FROM donors WHERE donor_id = ?",
+                                    params = id).fetchall()
+        for i in fetch:
+            if (i.donor_status == 'Available'):
+                return True
+            else:
+                return False
+
     def InsertPatients(self, ID, NAME, AGE, TYPE):
-        print(f'log: uspInsertPatients {ID, NAME, AGE, TYPE}')
         answer = tk.messagebox.askyesno(title='Confirmation',
                                         message='Are you sure you want to add this patient?')
         if answer:
+            print(f'log: uspInsertPatients {ID, NAME, AGE, TYPE}')
             sqlDB.executeQuery(sql='EXEC uspInsertPatients @patient_id=?, @patient_name=?, @patient_age=?, @blood_type=?',
                                params = (ID.get(),NAME.get(),AGE.get(),TYPE.get()))
             self.addPatients.destroy()
             tk.messagebox.showinfo(title='Success',message='Successfully added patient!')
 
     def uspModifyPatients(self, ID, NAME, AGE, TYPE):
-        print(f'log: uspModifyPatients {ID, NAME, AGE, TYPE}')
         answer = tk.messagebox.askyesno(title='Confirmation',
                                         message='Are you sure you want to modify this patient?')
         if answer:
+            print(f'log: uspModifyPatients {ID, NAME, AGE, TYPE}')
             sqlDB.executeQuery(sql='EXEC uspModifyPatients @patient_id=?, @patient_name=?, @patient_age=?, @blood_type=?',
                                params = (ID,NAME,AGE,TYPE))
             self.modifyPatients.destroy()
@@ -587,8 +695,8 @@ class GUI:
             tk.messagebox.showinfo(title='Success',message='Successfully modified patient!')
 
     def on_closing(self):
-        print(f'log: closed')
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            print(f'log: closed')
             self.main.destroy()
 
     def fetchName(self,arg):
