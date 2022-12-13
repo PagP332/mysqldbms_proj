@@ -5,7 +5,7 @@ from ttkthemes import ThemedTk
 from mysqldbms import SQLDBConnector
 
 dbname = 'bloodbank'
-localhost = 'LAPTOP-E4QKL3K4\SQLEXPRESS'
+localhost = 'LAPTOP-E4QKL3K4\SQLEXPRESS' #IMPORTANT MUST CHANGE DEPENDING ON USER
 sqlDB = SQLDBConnector(db=dbname, server=localhost)
 
 class GUI:
@@ -81,7 +81,7 @@ class GUI:
                                         ).grid(column=0,row=6,columnspan=2,sticky='ns',padx=10,pady=5)
         self.button_CheckDonorStatus = ttk.Button(self.main,
                                         text = "Check Donor Status",
-                                        command = None,
+                                        command = self.CheckDonorStatus,
                                         width = 30
                                         ).grid(column=0,row=7,columnspan=2,sticky='ns',padx=10,pady=5)
         self.button_RequestDonor = ttk.Button(self.main,
@@ -409,28 +409,161 @@ class GUI:
             tk.messagebox.showinfo(title='Success',message='Successfully deleted patient')
 
     def CheckDonorStatus(self):
-        pass
+        self.donorStatus = ThemedTk(theme='yaru')
+        self.donorStatus.title('Donor Status')
+        self.donorStatus.resizable(0,0)
+        fetch = sqlDB.executeQuery(sql='EXEC uspCheckDonorStatus').fetchall()
+        self.draw_CheckDonorStatus(start=1,arg=fetch)
+
     def drawheader_CheckDonorStatus(self):
         print(f'log: drawheader_CheckDonorStatus called')
-        ttk.Label(self.patientList,
-                  text="Patient No.",
+        ttk.Label(self.donorStatus,
+                  text="Donor ID",
                   font='Consolas 12',
-                  width=20,
+                  width = 10,
+                  anchor='center',
                   relief='groove').grid(column=0, row=0, ipadx=5,ipady=5,sticky='news')
-        ttk.Label(self.patientList,
+        ttk.Label(self.donorStatus,
                   text="Name",
                   font='Consolas 12',
-                  relief='groove').grid(column=1, row=0, columnspan=3,ipadx=5,ipady=5,sticky='news')
-        ttk.Label(self.patientList,
+                  width = 20,
+                  anchor='center',
+                  relief='groove').grid(column=1, row=0,ipadx=5,ipady=5,sticky='news')
+        ttk.Label(self.donorStatus,
                   text="Age",
                   font='Consolas 12',
-                  width = 4,
-                  relief='groove').grid(column=4, row=0,ipadx=5,ipady=5,sticky='nws')
-        ttk.Label(self.patientList,
+                  width = 5,
+                  anchor='center',
+                  relief='groove').grid(column=3, row=0,ipadx=5,ipady=5,sticky='nws')
+        ttk.Label(self.donorStatus,
                   text="Blood Type",
                   font='Consolas 12',
                   width = 10,
+                  anchor='center',
+                  relief='groove').grid(column=4, row=0,ipadx=5,ipady=5,sticky='nws')
+        ttk.Label(self.donorStatus,
+                  text="Contact Number",
+                  font='Consolas 12',
+                  width = 15,
+                  anchor='center',
                   relief='groove').grid(column=5, row=0,ipadx=5,ipady=5,sticky='nws')
+        ttk.Label(self.donorStatus,
+                  text="Location",
+                  font='Consolas 12',
+                  width = 42,
+                  anchor='center',
+                  relief='groove').grid(column=6, row=0, columnspan=2, ipadx=5,ipady=5,sticky='nws')
+        ttk.Label(self.donorStatus,
+                  text="Donor Status",
+                  font='Consolas 12',
+                  width = 15,
+                  anchor='center',
+                  #background='#000', foreground='#ff0',
+                  relief='groove').grid(column=8, row=0,ipadx=5,ipady=5,sticky='nws')
+
+    def draw_CheckDonorStatus(self, start, arg):
+        print(f'log: draw_CheckDonorStatus called')
+        self.drawheader_CheckDonorStatus()
+        rowPos = 1
+        for i in arg:
+            if (rowPos < start):
+                rowPos += 1
+                continue
+            if((rowPos - start) == 15):
+                print(f'log: page amount exceeded: break')
+                break
+            ttk.Label(self.donorStatus,
+                      text=f"#{i.donor_id}",
+                      font='Consolas 10',
+                      width = 10,
+                      anchor='center',
+                      relief='groove').grid(column=0, row=rowPos, ipadx=5,ipady=5,sticky='news')
+            ttk.Label(self.donorStatus,
+                      text=f"{i.donor_name}",
+                      font='Consolas 10',
+                      width = 20,
+                      anchor='center',
+                      relief='groove').grid(column=1, row=rowPos,ipadx=5,ipady=5,sticky='news')
+            ttk.Label(self.donorStatus,
+                      text=f"{i.donor_age}",
+                      font='Consolas 10',
+                      width = 6,
+                      anchor='center',
+                      relief='groove').grid(column=3, row=rowPos,ipadx=5,ipady=5,sticky='nws')
+            ttk.Label(self.donorStatus,
+                      text=f"{i.blood_type}",
+                      font='Consolas 10',
+                      width = 13,
+                      anchor='center',
+                      relief='groove').grid(column=4, row=rowPos,ipadx=5,ipady=5,sticky='nws')
+            ttk.Label(self.donorStatus,
+                      text=f"{i.donor_contact_no}",
+                      font='Consolas 10',
+                      width = 19,
+                      anchor='center',
+                      relief='groove').grid(column=5, row=rowPos,ipadx=5,ipady=5,sticky='nws')
+            ttk.Label(self.donorStatus,
+                      text=f"{i.loc_name}",
+                      font='Consolas 10',
+                      width = 54,
+                      anchor='center',
+                      relief='groove').grid(column=6, row=rowPos, columnspan=2, ipadx=5,ipady=5,sticky='nws')
+            print(i.donor_status)
+            print(str(i.donor_status))
+            if(str(i.donor_status) == "Available"):
+                ttk.Label(self.donorStatus,
+                          text="Available",
+                          font='Consolas 10',
+                          width = 19,
+                          anchor='center',
+                          background='#66FF66',
+                          relief='groove').grid(column=8, row=rowPos,ipadx=5,ipady=5,sticky='nws')
+            elif(i.donor_status == "Not Available"):
+                ttk.Label(self.donorStatus,
+                          text="Not Available",
+                          font='Consolas 10',
+                          width = 19,
+                          anchor='center',
+                          background='#FF6666',
+                          foreground='#FFFFFF',
+                          relief='groove').grid(column=8, row=rowPos,ipadx=5,ipady=5,sticky='nws')
+            elif(i.donor_status == "Request Pending"):
+                ttk.Label(self.donorStatus,
+                          text="Request Pending",
+                          font='Consolas 10',
+                          width = 19,
+                          anchor='center',
+                          background='#FFFF66',
+                          relief='groove').grid(column=8, row=rowPos,ipadx=5,ipady=5,sticky='nws')
+            else:
+                ttk.Label(self.donorStatus,
+                          text=f"{i.donor_status}",
+                          font='Consolas 10',
+                          width = 19,
+                          anchor='center',
+                          relief='groove').grid(column=8, row=rowPos,ipadx=5,ipady=5,sticky='nws')
+            rowPos += 1
+        button_pos = rowPos + 1
+        print(f'log: prev next page button drawn')
+        if (rowPos%15 == 1):
+            self.nextPage = ttk.Button(self.donorStatus,
+                                        text = "Next Page >>",
+                                        command = lambda: self.nextpage_CheckDonorStatus(pos=rowPos,fetch=arg),
+                                        width = 13,
+                                        ).grid(column=5,row=button_pos,sticky='news',pady=3)
+        if (rowPos != 16):
+            self.prevPage = ttk.Button(self.donorStatus,
+                                        text = "<< Prev Page",
+                                        command = lambda: self.nextpage_CheckDonorStatus(pos=((rowPos-(rowPos%16))-15),fetch=arg),
+                                        width = 13,
+                                        ).grid(column=4,row=button_pos,sticky='news',pady=3)
+        
+    def nextpage_CheckDonorStatus(self,pos,fetch):
+        print(f'log: change page called')
+        for widgets in self.donorStatus.winfo_children():
+            widgets.destroy()
+        self.draw_CheckDonorStatus(start=pos,arg=fetch)
+
     #-----------------------------functions----------------------------------------
     def InsertPatients(self, ID, NAME, AGE, TYPE):
         print(f'log: uspInsertPatients {ID, NAME, AGE, TYPE}')
