@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "DBMS project", "DBMS project.pyproj", "{6BF2BED7-80AC-4E31-8598-AD79F4A30813}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6BF2BED7-80AC-4E31-8598-AD79F4A30813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BF2BED7-80AC-4E31-8598-AD79F4A30813}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BD460275-82AA-47AD-BB9D-82A4758733D1}
+	EndGlobalSection
+EndGlobal
